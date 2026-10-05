@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StreamVault OTT Migration & Backup Tool (Standalone HTML/JS Client)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #10b981;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 16px;
+      border-radius: 8px;
+    }
+    .stat-val {
+      font-family: monospace;
+      font-size: 24px;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    button {
+      background: var(--accent);
+      color: #052e16;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>StreamVault OTT Migration & HLS Suite</h1>
+    <button onclick="loadState()">Refresh Inventory</button>
+  </header>
+  <div id="stats" class="grid"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Channel Name</th>
+        <th>Category</th>
+        <th>Type</th>
+        <th>Resolution</th>
+        <th>Validation Status</th>
+        <th>Latency</th>
+      </tr>
+    </thead>
+    <tbody id="channel-rows"></tbody>
+  </table>
+  <script>
+    async function loadState() {
+      const res = await fetch('/api/state');
+      const data = await res.json();
+      const s = data.summary;
+      document.getElementById('stats').innerHTML = `
+        <div class="stat"><div>Total Sources</div><div class="stat-val">${s.total_sources}</div></div>
+        <div class="stat"><div>Working Streams</div><div class="stat-val">${s.online}</div></div>
+        <div class="stat"><div>Failed Streams</div><div class="stat-val">${s.offline}</div></div>
+        <div class="stat"><div>Channels</div><div class="stat-val">${s.total_channels}</div></div>
+      `;
+      document.getElementById('channel-rows').innerHTML = data.channels.map(c => `
+        <tr>
+          <td>${c.name}</td>
+          <td>${c.category}</td>
+          <td>${c.type}</td>
+          <td>${c.resolution}</td>
+          <td>${c.validation_status}</td>
+          <td>${c.latency_ms}ms</td>
+        </tr>
+      `).join('');
+    }
+    loadState();
+  </script>
+</body>
+</html>

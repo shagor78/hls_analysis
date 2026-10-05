@@ -1,0 +1,6 @@
+{
+  "name": "StreamVault OTT Migration & HLS Suite",
+  "description": "Production-grade OTT platform migration, HLS dependency analyzer, M3U/M3U8 playlist parser, stream validator, and authorized database/API backup suite.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

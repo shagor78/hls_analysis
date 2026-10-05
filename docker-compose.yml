@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ott-migration-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.example
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://ott_admin:change_me_in_prod@database:5432/ott_migration
+      - ALLOW_PRIVATE_NETWORKS=false
+    volumes:
+      - ./data:/app/data
+      - ./backups:/app/backups
+      - ./exports:/app/exports
+      - ./logs:/app/logs
+    depends_on:
+      - database
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ott-migration-frontend
+    restart: unless-stopped
+    command: ["npm", "run", "preview", "--", "--port=4173", "--host=0.0.0.0"]
+    ports:
+      - "4173:4173"
+    depends_on:
+      - backend
+
+  database:
+    image: postgres:16-alpine
+    container_name: ott-migration-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ott_admin
+      POSTGRES_PASSWORD: change_me_in_prod
+      POSTGRES_DB: ott_migration
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./backups:/backups
